@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ubuntu 24.04 Terminal Mockup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ubuntu-bg: #300A24;
+            --header-bg: #2d2d2d;
+            --close-btn: #E95420;
+            --user-color: #87FF5F;
+            --path-color: #5F87FF;
+            --page-bg: #0a0a0a;
+            --text-color: #ffffff;
+            --header-text: #cccccc;
+            --dot-color: #4f4f4f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--page-bg);
+            height: 100vh;
+            display: flex;
+            flex-direction: column; /* Stack toolbar and window */
+            align-items: center;
+            justify-content: center;
+            font-family: 'Ubuntu Mono', monospace;
+            overflow: hidden;
+            gap: 20px; /* Space between toolbar and window */
+        }
+
+        .terminal-window {
+            width: 850px;
+            height: 550px;
+            background-color: var(--ubuntu-bg);
+            border-radius: 10px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.7),
+                inset 0 0 15px rgba(0, 0, 0, 0.3); /* Final Touch: Inner Shadow */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header {
+            background-color: var(--header-bg);
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 12px; /* Header Padding: 12px from left */
+            user-select: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+            gap: 12px; /* Tight Gap: 12px between controls and title */
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .control-dot {
+            width: 16px; /* Button Scale: 16px */
+            height: 16px;
+            border-radius: 50%;
+            background-color: var(--dot-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            position: relative;
+        }
+
+        /* SVG-style CSS Icons */
+        .icon {
+            opacity: 0; /* Default Visibility: 0 */
+            transition: opacity 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header:hover .icon {
+            opacity: 0.8; /* Hover Visibility: 0.8 on header enter */
+        }
+
+        .icon-close {
+            position: relative;
+            width: 7px;
+            height: 7px;
+        }
+        .icon-close::before, .icon-close::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 9px;
+            height: 1px;
+            background-color: white;
+        }
+        .icon-close::before { transform: translate(-50%, -50%) rotate(45deg); }
+        .icon-close::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+        .icon-min {
+            width: 7px;
+            height: 1px;
+            background-color: white;
+        }
+
+        .icon-max {
+            width: 6px;
+            height: 6px;
+            border: 1px solid white;
+            border-radius: 1px;
+        }
+
+        .control-dot.close {
+            background-color: var(--close-btn);
+        }
+
+        .window-title {
+            color: #d1d1d1;
+            font-size: 13px; /* GNOME title is usually slightly smaller */
+            font-weight: 400;
+            padding: 0; /* Remove padding to ensure perfect vertical center */
+            margin: 0;
+            border-radius: 4px;
+            transition: background 0.2s;
+            cursor: text;
+            opacity: 0.7;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            height: 100%; /* Vertical Alignment: Center within parent flex */
+        }
+
+        /* Default styling for terminal output */
+        .terminal-body {
+            flex-grow: 1;
+            padding: 12px;
+            color: #ffffff; /* Explicitly white */
+            font-weight: normal; /* Explicitly normal weight */
+            font-size: 16px;
+            line-height: 1.4;
+            overflow-y: auto;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+            caret-color: #ffffff;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        /* Glassmorphism External Toolbar styling */
+        .external-toolbar {
+            position: fixed;
+            top: 20px; /* Fixed at top */
+            background-color: rgba(26, 26, 26, 0.6);
+            backdrop-filter: blur(12px); /* Glassmorphism blur */
+            -webkit-backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            display: flex;
+            gap: 12px;
+            border-radius: 12px;
+            align-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.12); /* Glassmorphism border */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .toolbar-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toolbar-btn:active {
+            transform: scale(0.96);
+        }
+
+        .toolbar-label {
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 10px;
+            margin-right: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="external-toolbar">
+        <span class="toolbar-label">MODS</span>
+        <button class="toolbar-btn" id="btn-prompt" title="Ctrl + B">Insert Prompt</button>
+        <button class="toolbar-btn" id="btn-bold">Toggle Bold</button>
+        <button class="toolbar-btn" id="btn-reset">Normal White</button>
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
+        <button class="toolbar-btn" id="btn-copy">Copy to Clipboard</button>
+    </div>
+
+    <div class="terminal-window">
+        <div class="header">
+            <div class="controls">
+                <div class="control-dot close"><div class="icon icon-close"></div></div>
+                <div class="control-dot"><div class="icon icon-min"></div></div>
+                <div class="control-dot"><div class="icon icon-max"></div></div>
+            </div>
+            <div class="window-title" contenteditable="true">student@ubuntu: ~</div>
+        </div>
+        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">student@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
+    </div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const terminal = document.getElementById('terminal');
+            const btnPrompt = document.getElementById('btn-prompt');
+            const btnBold = document.getElementById('btn-bold');
+            const btnReset = document.getElementById('btn-reset');
+            const btnCopy = document.getElementById('btn-copy');
+
+            // --- Functionality ---
+
+            const copyToClipboard = () => {
+                const content = terminal.innerText;
+                navigator.clipboard.writeText(content).then(() => {
+                    const originalText = btnCopy.innerText;
+                    btnCopy.innerText = 'Copied!';
+                    btnCopy.style.color = '#87FF5F';
+                    setTimeout(() => {
+                        btnCopy.innerText = originalText;
+                        btnCopy.style.color = '';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                });
+            };
+
+            const insertPrompt = () => {
+                const promptHTML = '<span class="user" style="color: #87FF5F; font-weight: bold;">student@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;';
+                document.execCommand('insertHTML', false, promptHTML);
+                
+                // Functional Requirement: Immediately set style back to Normal White
+                document.execCommand('bold', false, null); 
+                document.execCommand('foreColor', false, '#ffffff');
+            };
+
+            const toggleBold = () => {
+                document.execCommand('bold', false, null);
+            };
+
+            const resetToNormal = () => {
+                document.execCommand('removeFormat', false, null);
+                document.execCommand('foreColor', false, '#ffffff');
+                document.execCommand('bold', false, null); 
+                // Toggle bold off if it was on. If it was off, this turns it on. 
+                // Executing 'bold' always toggles in contenteditable.
+            };
+
+            // --- Event Listeners ---
+
+            btnPrompt.addEventListener('click', insertPrompt);
+            btnBold.addEventListener('click', toggleBold);
+            btnReset.addEventListener('click', resetToNormal);
+            btnCopy.addEventListener('click', copyToClipboard);
+
+            // Hotkeys
+            terminal.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.key.toLowerCase() === 'b') {
+                    e.preventDefault();
+                    insertPrompt();
+                }
+            });
+
+            // Handle Paste - Strict Plain Text Only
+            terminal.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+                
+                // Insert as plain text only, stripping all HTML/styles
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+                selection.deleteFromDocument();
+                selection.getRangeAt(0).insertNode(document.createTextNode(text));
+                
+                // Move cursor to end of inserted text
+                selection.collapseToEnd();
+            });
+
+            // --- Lifecycle ---
+            
+            // Auto-focus the terminal
+            terminal.focus();
+
+            // Place cursor at the end
+            const moveToEnd = () => {
+                const range = document.createRange();
+                const selection = window.getSelection();
+                range.selectNodeContents(terminal);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            };
+            
+            moveToEnd();
+
+            // Re-focus on click
+            terminal.addEventListener('click', () => {
+                terminal.focus();
+            });
+        });
+    </script>
+</body>
+</html>
