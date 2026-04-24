@@ -28,14 +28,15 @@
 
         body {
             background-color: var(--page-bg);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
-            flex-direction: column; /* Stack toolbar and window */
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Stacks toolbar -> terminal -> grid */
+            padding: 50px 0;
             font-family: 'Ubuntu Mono', monospace;
-            overflow: hidden;
-            gap: 20px; /* Space between toolbar and window */
+            overflow-y: auto; /* Allow scrolling for additional sections */
+            gap: 20px;
         }
 
         .terminal-window {
@@ -89,17 +90,12 @@
             position: relative;
         }
 
-        /* SVG-style CSS Icons */
+        /* SVG-style CSS Icons - Always Visible */
         .icon {
-            opacity: 0; /* Default Visibility: 0 */
-            transition: opacity 0.2s ease;
+            opacity: 0.8;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .header:hover .icon {
-            opacity: 0.8; /* Hover Visibility: 0.8 on header enter */
         }
 
         .icon-close {
@@ -138,7 +134,7 @@
 
         .window-title {
             color: #d1d1d1;
-            font-size: 13px; /* GNOME title is usually slightly smaller */
+            font-size: 16px; /* GNOME title is usually slightly smaller */
             font-weight: 400;
             padding: 0; /* Remove padding to ensure perfect vertical center */
             margin: 0;
@@ -169,6 +165,7 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
             caret-color: #ffffff;
+            caret-shape: block; /* Ubuntu solid block cursor */
         }
 
         .terminal-body::-webkit-scrollbar {
@@ -182,18 +179,18 @@
 
         /* Glassmorphism External Toolbar styling */
         .external-toolbar {
-            position: fixed;
-            top: 20px; /* Fixed at top */
-            background-color: rgba(26, 26, 26, 0.6);
-            backdrop-filter: blur(12px); /* Glassmorphism blur */
+            position: relative; /* Remove absolute/sticky overlap */
+            background-color: rgba(18, 18, 18, 0.8); /* Slightly darker */
+            backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            padding: 10px 24px;
+            padding: 12px 28px;
             display: flex;
-            gap: 12px;
+            gap: 15px;
             border-radius: 12px;
             align-items: center;
-            border: 1px solid rgba(255, 255, 255, 0.12); /* Glassmorphism border */
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            margin-bottom: 10px; /* Space above terminal */
             z-index: 1000;
         }
 
@@ -221,17 +218,38 @@
             letter-spacing: 1.5px;
             font-weight: bold;
         }
+
+        .toolbar-input {
+            background: rgba(0, 0, 0, 0.4); /* Darker background */
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-family: 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            width: 250px; /* Consolidated width */
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .toolbar-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
     </style>
 </head>
 <body>
 
     <div class="external-toolbar">
-        <span class="toolbar-label">MODS</span>
-        <button class="toolbar-btn" id="btn-prompt" title="Ctrl + B">Insert Prompt</button>
+        <span class="toolbar-label">Identity</span>
+        <input type="text" id="input-identity" class="toolbar-input" placeholder="user@host:path" value="student@ubuntu">
+        
+        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
+        
+        <button class="toolbar-btn" id="btn-prompt">Insert Prompt</button>
         <button class="toolbar-btn" id="btn-bold">Toggle Bold</button>
         <button class="toolbar-btn" id="btn-reset">Normal White</button>
-        <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
-        <button class="toolbar-btn" id="btn-copy">Copy to Clipboard</button>
     </div>
 
     <div class="terminal-window">
@@ -241,9 +259,9 @@
                 <div class="control-dot"><div class="icon icon-min"></div></div>
                 <div class="control-dot"><div class="icon icon-max"></div></div>
             </div>
-            <div class="window-title" contenteditable="true">student@ubuntu: ~</div>
+            <div class="window-title" contenteditable="true" style="font-size: 14px;">student@ubuntu: ~</div>
         </div>
-        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">student@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
+        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">student</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
     </div>
 
     <script>
@@ -252,30 +270,31 @@
             const btnPrompt = document.getElementById('btn-prompt');
             const btnBold = document.getElementById('btn-bold');
             const btnReset = document.getElementById('btn-reset');
-            const btnCopy = document.getElementById('btn-copy');
+            
+            const inputIdentity = document.getElementById('input-identity');
+            const windowTitle = document.querySelector('.window-title');
 
             // --- Functionality ---
 
-            const copyToClipboard = () => {
-                const content = terminal.innerText;
-                navigator.clipboard.writeText(content).then(() => {
-                    const originalText = btnCopy.innerText;
-                    btnCopy.innerText = 'Copied!';
-                    btnCopy.style.color = '#87FF5F';
-                    setTimeout(() => {
-                        btnCopy.innerText = originalText;
-                        btnCopy.style.color = '';
-                    }, 2000);
-                }).catch(err => {
-                    console.error('Failed to copy: ', err);
-                });
+            const updateHeaderTitle = () => {
+                const full = inputIdentity.value || 'user@host: ~';
+                // Only take the user@host part for the title usually, 
+                // but we can just show the full string up to path
+                const parts = full.split(':');
+                windowTitle.innerText = parts[0] + (parts[1] ? ': ' + parts[1] : ': ~');
             };
 
             const insertPrompt = () => {
-                const promptHTML = '<span class="user" style="color: #87FF5F; font-weight: bold;">student@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;';
-                document.execCommand('insertHTML', false, promptHTML);
+                const full = inputIdentity.value || 'student@ubuntu';
                 
-                // Functional Requirement: Immediately set style back to Normal White
+                // Split logic: user@host | : | path
+                let [userHost, path] = full.split(':');
+                if (!path) path = '~';
+                path = path.replace('$', '').replace('#', '').trim();
+
+                const promptHTML = `<span class="user" style="color: #87FF5F; font-weight: bold;">${userHost}</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">${path}</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;`;
+                
+                document.execCommand('insertHTML', false, promptHTML);
                 document.execCommand('bold', false, null); 
                 document.execCommand('foreColor', false, '#ffffff');
             };
@@ -297,7 +316,11 @@
             btnPrompt.addEventListener('click', insertPrompt);
             btnBold.addEventListener('click', toggleBold);
             btnReset.addEventListener('click', resetToNormal);
-            btnCopy.addEventListener('click', copyToClipboard);
+
+            inputIdentity.addEventListener('input', updateHeaderTitle);
+            
+            // Initialize header title
+            updateHeaderTitle();
 
             // Hotkeys
             terminal.addEventListener('keydown', (e) => {
