@@ -931,6 +931,21 @@ total 4
                 }
             });
 
+            // Helper function to detect common file patterns and wrap them in correct color span classes
+            const highlightFileNames = (lineText) => {
+                // Matches filenames with extensions (.js, .jsx, .ts, .tsx, .json, .css, .txt, .sh)
+                return lineText.replace(/\b([\w-]+\.(js|jsx|ts|tsx|json|css|txt|sh))\b/g, (match, filename, ext) => {
+                    const extension = ext.toLowerCase();
+                    if (extension === 'sh') {
+                        // ONLY explicit shell scripts are styled as green
+                        return `<span style="color: #33d17a; font-weight: bold;">${filename}</span>`;
+                    } else {
+                        // All standard source code, configuration, stylesheet, and data files display in clean, uniform white
+                        return `<span style="color: #ffffff;">${filename}</span>`;
+                    }
+                });
+            };
+
             // Helper function to parse terminal lines and color them dynamically
             const parseAndColorText = (text) => {
                 const lines = text.split(/\r?\n/);
@@ -944,14 +959,16 @@ total 4
                         const path = match[3];
                         const symbol = match[4];
                         const cmd = match[5];
+                        const highlightedCmd = highlightFileNames(cmd);
                         
                         return `<span class="user" style="color: #33d17a; font-weight: bold;">${userHost}</span>` +
                                `<span style="color: #ffffff; font-weight: bold;">${colon}</span>` +
                                `<span class="path" style="color: #3584e4; font-weight: bold;">${path}</span>` +
                                `<span class="char" style="color: #ffffff; font-weight: bold;">${symbol}</span>` +
-                               `<span class="command" style="color: #dfdbce;">${cmd}</span>`;
+                               `<span class="command" style="color: #ffffff;">${highlightedCmd}</span>`;
                     } else {
-                        return `<span style="color: #dfdbce;">${line}</span>`;
+                        const highlightedLine = highlightFileNames(line);
+                        return `<span style="color: #ffffff;">${highlightedLine}</span>`;
                     }
                 });
                 return parsedLines.join('\n');
