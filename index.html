@@ -6,7 +6,7 @@
     <title>Ubuntu 24.04 Terminal Mockup</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&family=Ubuntu+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --ubuntu-bg: #300A24;
@@ -14,7 +14,7 @@
             --close-btn: #E95420;
             --user-color: #87FF5F;
             --path-color: #5F87FF;
-            --page-bg: #0a0a0a;
+            --page-bg: radial-gradient(circle at center, #2c001e 0%, #0f000a 100%);
             --text-color: #ffffff;
             --header-text: #cccccc;
             --dot-color: #4f4f4f;
@@ -27,7 +27,7 @@
         }
 
         body {
-            background-color: var(--page-bg);
+            background: var(--page-bg);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -237,19 +237,461 @@
             background: rgba(255, 255, 255, 0.08);
         }
 
+        .toolbar-btn.active-btn {
+            background: rgba(233, 84, 32, 0.15) !important;
+            border-color: #E95420 !important;
+            color: #ffffff !important;
+            box-shadow: 0 0 8px rgba(233, 84, 32, 0.4);
+        }
+
+        /* ==========================================================================
+           Ubuntu Permissions Window Styling (Boxed Yaru Card Theme)
+           ========================================================================== */
+        .permissions-window {
+            width: 650px;
+            background-color: #fafafa;
+            border-radius: 16px; /* Smooth rounded corners */
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.35),
+                0 1px 3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            overflow: visible; /* Prevents clipping of external absolute buttons and dropdown menus */
+            margin-top: 48px; /* 48px vertical margin separation */
+            margin-bottom: 48px;
+            font-family: 'Ubuntu', sans-serif;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.3s ease, transform 0.3s ease, height 0.3s ease, margin 0.3s ease;
+            position: relative; /* Enables absolute coordinates for outside edit buttons */
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .permissions-window.hidden {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            pointer-events: none;
+            height: 0;
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            border-color: transparent;
+            box-shadow: none;
+            overflow: hidden;
+        }
+
+        .permissions-header {
+            background-color: #ffffff;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            user-select: none;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .permissions-header .header-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3d3d3d;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+        }
+
+        .permissions-header .header-action-btn:hover {
+            background-color: #f1f1f1;
+            color: #111111;
+        }
+
+        .permissions-header .header-action-btn:active {
+            transform: scale(0.92);
+        }
+
+        .permissions-header .header-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: #111111;
+            text-align: center;
+        }
+
+        .permissions-body {
+            padding: 24px 32px 32px 32px;
+            background-color: #f6f6f6; /* Native light gray settings background */
+            display: flex;
+            flex-direction: column;
+            gap: 18px; /* Spacing between cards */
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        /* Distinct white card containers with smooth highly rounded corners */
+        .yaru-card {
+            background-color: #ffffff;
+            border-radius: 14px; /* Highly rounded 12px-16px corners */
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+            overflow: visible; /* Needed for absolute dropdown choices overlay */
+            transition: box-shadow 0.3s ease;
+            width: 100%; /* Stretches card to full width */
+        }
+
+        .yaru-card:focus-within {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .yaru-card-header {
+            padding: 14px 18px 2px 18px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #727272;
+            letter-spacing: 0.8px;
+            user-select: none;
+        }
+
+        .yaru-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            min-height: 52px;
+            position: relative;
+        }
+
+        /* Faint divider lines between rows within each card */
+        .yaru-row:not(:last-child) {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        }
+
+        .row-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .row-label {
+            font-size: 14.5px;
+            font-weight: 500;
+            color: #2d2d2d;
+            font-family: 'Ubuntu', sans-serif;
+        }
+
+        .row-desc {
+            font-size: 12px;
+            color: #727272;
+        }
+
+        /* Yaru Select / Dropdown Trigger Boxed Widget - Borderless & Floating */
+        .yaru-select-wrapper {
+            position: relative;
+            width: 190px;
+            user-select: none;
+        }
+
+        .yaru-select-trigger {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 6px 12px;
+            font-size: 14px;
+            color: #2d2d2d;
+            cursor: default;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+            pointer-events: none; /* Disabled in View Mode */
+        }
+
+        .edit-mode .yaru-select-trigger {
+            cursor: pointer;
+            pointer-events: auto; /* Enabled in Edit Mode */
+        }
+
+        .edit-mode .yaru-select-trigger:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+            color: #111111;
+        }
+
+        .edit-mode .yaru-select-trigger:focus-within,
+        .edit-mode .yaru-select-trigger.active {
+            background-color: rgba(233, 84, 32, 0.06);
+            color: #E95420; /* Ubuntu Orange accent color */
+            outline: none;
+        }
+
+        .yaru-select-trigger .selected-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .yaru-select-trigger .chevron-icon {
+            color: #888888;
+            opacity: 0.4; /* Styled as disabled text by default (View Mode) */
+            transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+        }
+
+        .edit-mode .yaru-select-trigger .chevron-icon {
+            opacity: 0.8; /* Enabled look in Edit Mode */
+            color: #555555;
+        }
+
+        .edit-mode .yaru-select-trigger:hover .chevron-icon {
+            opacity: 1;
+            color: #2d2d2d;
+        }
+
+        .edit-mode .yaru-select-trigger.active .chevron-icon {
+            transform: rotate(180deg);
+            color: #E95420;
+            opacity: 1;
+        }
+
+        /* CRITICAL: Hide dropdown chevrons next to Owner and Group names in View Mode */
+        #select-owner-trigger .chevron-icon,
+        #select-group-trigger .chevron-icon {
+            display: none !important;
+        }
+
+        /* Show Owner and Group chevrons only in Edit Mode */
+        .edit-mode #select-owner-trigger .chevron-icon,
+        .edit-mode #select-group-trigger .chevron-icon {
+            display: block !important;
+        }
+
+        .yaru-select-options {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-8px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            padding: 4px 0;
+        }
+
+        .yaru-select-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .yaru-option {
+            padding: 9px 12px;
+            font-size: 13.5px;
+            color: #2d2d2d;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            text-align: left;
+        }
+
+        .yaru-option:hover {
+            background-color: rgba(233, 84, 32, 0.08);
+            color: #E95420;
+        }
+
+        .yaru-option.selected {
+            background-color: #E95420;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        /* Elegant Global Edit Button placed absolutely OUTSIDE above the top-right corner of the window */
+        .global-edit-btn {
+            position: absolute;
+            right: 0;
+            top: -46px; /* Floating neatly above the top-right corner of the window */
+            height: 34px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 0 16px;
+            border-radius: 6px; /* Rounded corners matching header bar action item */
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            background-color: #3d3d3d; /* Subtle dark gray */
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 500;
+            font-family: 'Ubuntu', sans-serif;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1), transform 0.1s ease;
+        }
+
+        .global-edit-btn:hover {
+            background-color: #4a4a4a;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .global-edit-btn:active {
+            transform: translateY(0) scale(0.97);
+            background-color: #2b2b2b;
+        }
+
+        /* Editing active state (GNOME green for active save actions) */
+        .global-edit-btn.editing-active {
+            background-color: #2ec27e;
+            color: #ffffff;
+            border-color: #26a269;
+            box-shadow: 0 3px 10px rgba(46, 194, 126, 0.35);
+        }
+
+        .global-edit-btn.editing-active:hover {
+            background-color: #26a269;
+            box-shadow: 0 5px 15px rgba(38, 162, 105, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .global-edit-btn.editing-active:active {
+            transform: translateY(0) scale(0.97);
+            background-color: #208b59;
+        }
+
+        .global-edit-btn .icon-save {
+            display: none !important;
+        }
+
+        .global-edit-btn.editing-active .icon-pencil {
+            display: none !important;
+        }
+        
+        .global-edit-btn.editing-active .icon-save {
+            display: block !important;
+        }
+
+        /* Inline Pencil edit buttons hidden by default, visible in edit-mode */
+        .inline-edit-btn {
+            display: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #727272;
+            transition: all 0.2s ease, transform 0.1s ease;
+            margin-left: 6px;
+        }
+
+        .edit-mode .inline-edit-btn {
+            display: flex;
+        }
+
+        .inline-edit-btn:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+            color: #111111;
+        }
+
+        .inline-edit-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Dynamic name editor inline input */
+        .yaru-editable-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .inline-edit-input {
+            background: #ffffff;
+            border: 1px solid #E95420;
+            box-shadow: 0 0 0 3px rgba(233, 84, 32, 0.15);
+            color: #2d2d2d;
+            font-family: 'Ubuntu', sans-serif;
+            font-size: 13.5px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            outline: none;
+            width: 140px;
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #727272;
+            transition: all 0.2s ease, transform 0.1s ease;
+        }
+
+        .icon-btn:hover {
+            background-color: rgba(0, 0, 0, 0.06);
+            color: #111111;
+        }
+
+        .icon-btn:active {
+            transform: scale(0.9);
+        }
+
+        .icon-btn.primary {
+            color: #E95420;
+        }
+
+        .icon-btn.primary:hover {
+            background-color: rgba(233, 84, 32, 0.08);
+            color: #E95420;
+        }
+
+        /* Security Context block style inside the card */
+        .security-value {
+            font-size: 14px;
+            color: #555555;
+            font-family: 'Ubuntu Mono', monospace;
+            background-color: rgba(0, 0, 0, 0.04);
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1px dashed rgba(0, 0, 0, 0.08);
+            user-select: text;
+        }
+
     </style>
 </head>
 <body>
 
     <div class="external-toolbar">
         <span class="toolbar-label">Identity</span>
-        <input type="text" id="input-identity" class="toolbar-input" placeholder="user@host:path" value="student@ubuntu">
+        <input type="text" id="input-identity" class="toolbar-input" placeholder="user@host:path" value="srezon@ubuntu">
         
         <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
         
         <button class="toolbar-btn" id="btn-prompt">Insert Prompt</button>
         <button class="toolbar-btn" id="btn-bold">Toggle Bold</button>
         <button class="toolbar-btn" id="btn-reset">Normal White</button>
+        
+        <button class="toolbar-btn active-btn" id="btn-permissions" style="margin-left: auto; border-color: rgba(233, 84, 32, 0.4); color: #E95420; font-weight: bold;">Permissions Panel</button>
     </div>
 
     <div class="terminal-window">
@@ -259,9 +701,165 @@
                 <div class="control-dot"><div class="icon icon-min"></div></div>
                 <div class="control-dot"><div class="icon icon-max"></div></div>
             </div>
-            <div class="window-title" contenteditable="true" style="font-size: 14px;">student@ubuntu: ~</div>
+            <div class="window-title" contenteditable="true" style="font-size: 14px;">srezon@ubuntu: ~</div>
         </div>
-        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">student</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
+        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">srezon</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span> ls -l
+total 4
+-rw-r--r-- 1 srezon srezon 1234 May 24 10:00 note.txt
+<span class="user" style="color: #87FF5F; font-weight: bold;">srezon</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
+    </div>
+
+    <!-- ==========================================================================
+       Ubuntu File Permissions / Properties Window (Boxed Yaru Card Theme)
+       ========================================================================== -->
+    <div class="permissions-window" id="permissions-panel">
+        <div class="permissions-header">
+            <button class="header-action-btn" id="btn-back-perm" title="Back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            </button>
+            <div class="header-title">Set Custom Permissions</div>
+            <button class="header-action-btn" id="btn-close-perm" title="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="permissions-body">
+            
+            <!-- Group 1: Owner Card -->
+            <div class="yaru-card">
+                <div class="yaru-card-header">Owner</div>
+                
+                <!-- Owner Selector Row -->
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Owner</span>
+                        <span class="row-desc">The user who owns the file</span>
+                    </div>
+                    <div class="yaru-editable-container" id="owner-edit-container">
+                        <div class="yaru-select-wrapper" id="select-owner-wrapper">
+                            <div class="yaru-select-trigger" id="select-owner-trigger">
+                                <span class="selected-text" id="owner-display-name">Soura (You)</span>
+                                <svg class="chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                            <div class="yaru-select-options" id="select-owner-options">
+                                <!-- Dynamically loaded options -->
+                            </div>
+                        </div>
+                        <button class="inline-edit-btn" id="btn-edit-owner" title="Edit owner name">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Owner Access Row -->
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Access</span>
+                        <span class="row-desc">File access permissions for the owner</span>
+                    </div>
+                    <div class="yaru-select-wrapper" id="select-owner-access-wrapper">
+                        <div class="yaru-select-trigger" id="select-owner-access-trigger">
+                            <span class="selected-text">Read and Write</span>
+                            <svg class="chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="yaru-select-options">
+                            <div class="yaru-option selected" data-value="readwrite">Read and Write</div>
+                            <div class="yaru-option" data-value="readonly">Read-Only</div>
+                            <div class="yaru-option" data-value="none">None</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group 2: Group Card -->
+            <div class="yaru-card">
+                <div class="yaru-card-header">Group</div>
+                
+                <!-- Group Selector Row -->
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Group</span>
+                        <span class="row-desc">The group associated with the file</span>
+                    </div>
+                    <div class="yaru-editable-container" id="group-edit-container">
+                        <div class="yaru-select-wrapper" id="select-group-wrapper">
+                            <div class="yaru-select-trigger" id="select-group-trigger">
+                                <span class="selected-text" id="group-display-name">Soura</span>
+                                <svg class="chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                            <div class="yaru-select-options" id="select-group-options">
+                                <!-- Dynamically loaded options -->
+                            </div>
+                        </div>
+                        <button class="inline-edit-btn" id="btn-edit-group" title="Edit group name">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Group Access Row -->
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Access</span>
+                        <span class="row-desc">File access permissions for the group</span>
+                    </div>
+                    <div class="yaru-select-wrapper" id="select-group-access-wrapper">
+                        <div class="yaru-select-trigger" id="select-group-access-trigger">
+                            <span class="selected-text">Read-Only</span>
+                            <svg class="chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="yaru-select-options">
+                            <div class="yaru-option" data-value="readwrite">Read and Write</div>
+                            <div class="yaru-option selected" data-value="readonly">Read-Only</div>
+                            <div class="yaru-option" data-value="none">None</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group 3: Other Users Card -->
+            <div class="yaru-card">
+                <div class="yaru-card-header">Other Users</div>
+                
+                <!-- Other Access Row -->
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Access</span>
+                        <span class="row-desc">File access permissions for all others</span>
+                    </div>
+                    <div class="yaru-select-wrapper" id="select-others-access-wrapper">
+                        <div class="yaru-select-trigger" id="select-others-access-trigger">
+                            <span class="selected-text">Write-Only</span>
+                            <svg class="chevron-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 8px; transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="yaru-select-options">
+                            <div class="yaru-option" data-value="readwrite">Read and Write</div>
+                            <div class="yaru-option" data-value="readonly">Read-Only</div>
+                            <div class="yaru-option selected" data-value="writeonly">Write-Only</div>
+                            <div class="yaru-option" data-value="none">None</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Group 4: Security Context Card -->
+            <div class="yaru-card">
+                <div class="yaru-row">
+                    <div class="row-content">
+                        <span class="row-label">Security Context</span>
+                        <span class="row-desc">SELinux security context details</span>
+                    </div>
+                    <div class="security-value">Unknown</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Elegant Global Edit Button placed absolutely OUTSIDE above the top-right corner of the window -->
+        <button class="global-edit-btn" id="btn-global-edit" title="Edit Permissions">
+            <svg class="icon-pencil" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+            <svg class="icon-save" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="btn-global-edit-text">Edit Permissions</span>
+        </button>
     </div>
 
     <script>
@@ -285,7 +883,7 @@
             };
 
             const insertPrompt = () => {
-                const full = inputIdentity.value || 'student@ubuntu';
+                const full = inputIdentity.value || 'srezon@ubuntu';
                 
                 // Split logic: user@host | : | path
                 let [userHost, path] = full.split(':');
@@ -366,6 +964,362 @@
             terminal.addEventListener('click', () => {
                 terminal.focus();
             });
+
+            // ==========================================================================
+            // Ubuntu Permissions Window Interaction Logic
+            // ==========================================================================
+            const permissionsPanel = document.getElementById('permissions-panel');
+            const btnPermissions = document.getElementById('btn-permissions');
+            const btnClosePerm = document.getElementById('btn-close-perm');
+            const btnBackPerm = document.getElementById('btn-back-perm');
+            const btnGlobalEdit = document.getElementById('btn-global-edit');
+
+            // Interactive state data
+            let ownersList = ["Soura (You)", "root", "admin", "guest"];
+            let groupsList = ["Soura", "root", "admin", "docker", "sudo"];
+            let activeOwner = "Soura (You)";
+            let activeGroup = "Soura";
+            let isEditMode = false;
+
+            // Initialize dynamic dropdown structures
+            const selectOwnerWrapper = document.getElementById('select-owner-wrapper');
+            const selectOwnerTrigger = document.getElementById('select-owner-trigger');
+            const selectOwnerOptions = document.getElementById('select-owner-options');
+
+            const selectGroupWrapper = document.getElementById('select-group-wrapper');
+            const selectGroupTrigger = document.getElementById('select-group-trigger');
+            const selectGroupOptions = document.getElementById('select-group-options');
+
+            // Toggle Panel Visibility
+            const togglePermissionsPanel = (forceShow = null) => {
+                const isCurrentlyHidden = permissionsPanel.classList.contains('hidden');
+                const shouldShow = forceShow !== null ? forceShow : isCurrentlyHidden;
+
+                if (shouldShow) {
+                    permissionsPanel.classList.remove('hidden');
+                    btnPermissions.classList.add('active-btn');
+                    setTimeout(() => {
+                        permissionsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 50);
+                } else {
+                    permissionsPanel.classList.add('hidden');
+                    btnPermissions.classList.remove('active-btn');
+                    
+                    // Reset to view mode if closed in editing state
+                    if (isEditMode) {
+                        btnGlobalEdit.click();
+                    }
+                }
+            };
+
+            btnPermissions.addEventListener('click', () => togglePermissionsPanel());
+            btnClosePerm.addEventListener('click', () => togglePermissionsPanel(false));
+            btnBackPerm.addEventListener('click', () => togglePermissionsPanel(false));
+
+            // Generic drop-down handling
+            const closeAllDropdowns = () => {
+                document.querySelectorAll('.yaru-select-options').forEach(el => el.classList.remove('show'));
+                document.querySelectorAll('.yaru-select-trigger').forEach(el => el.classList.remove('active'));
+            };
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.yaru-select-wrapper')) {
+                    closeAllDropdowns();
+                }
+            });
+
+            // Initialize a static access dropdown
+            const initAccessDropdown = (wrapperId) => {
+                const wrapper = document.getElementById(wrapperId);
+                if (!wrapper) return;
+                const trigger = wrapper.querySelector('.yaru-select-trigger');
+                const textSpan = trigger.querySelector('.selected-text');
+                const optionsContainer = wrapper.querySelector('.yaru-select-options');
+                const options = wrapper.querySelectorAll('.yaru-option');
+
+                trigger.addEventListener('click', (e) => {
+                    if (!isEditMode) return;
+                    e.stopPropagation();
+                    const isOpen = optionsContainer.classList.contains('show');
+                    closeAllDropdowns();
+                    if (!isOpen) {
+                        optionsContainer.classList.add('show');
+                        trigger.classList.add('active');
+                    }
+                });
+
+                options.forEach(opt => {
+                    opt.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        textSpan.innerText = opt.innerText;
+                        options.forEach(o => o.classList.remove('selected'));
+                        opt.classList.add('selected');
+                        closeAllDropdowns();
+                    });
+                });
+            };
+
+            // Init standard Access rows
+            initAccessDropdown('select-owner-access-wrapper');
+            initAccessDropdown('select-group-access-wrapper');
+            initAccessDropdown('select-others-access-wrapper');
+
+            // Render Owner Dropdown
+            const renderOwnerDropdown = () => {
+                selectOwnerOptions.innerHTML = '';
+                ownersList.forEach(owner => {
+                    const opt = document.createElement('div');
+                    opt.className = 'yaru-option' + (owner === activeOwner ? ' selected' : '');
+                    opt.innerText = owner;
+                    opt.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeOwner = owner;
+                        document.getElementById('owner-display-name').innerText = owner;
+                        renderOwnerDropdown();
+                        closeAllDropdowns();
+                    });
+                    selectOwnerOptions.appendChild(opt);
+                });
+            };
+
+            // Render Group Dropdown
+            const renderGroupDropdown = () => {
+                selectGroupOptions.innerHTML = '';
+                groupsList.forEach(group => {
+                    const opt = document.createElement('div');
+                    opt.className = 'yaru-option' + (group === activeGroup ? ' selected' : '');
+                    opt.innerText = group;
+                    opt.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        activeGroup = group;
+                        document.getElementById('group-display-name').innerText = group;
+                        renderGroupDropdown();
+                        closeAllDropdowns();
+                    });
+                    selectGroupOptions.appendChild(opt);
+                });
+            };
+
+            // Setup trigger events for Owner & Group dropdowns
+            selectOwnerTrigger.addEventListener('click', (e) => {
+                if (!isEditMode) return;
+                e.stopPropagation();
+                const isOpen = selectOwnerOptions.classList.contains('show');
+                closeAllDropdowns();
+                if (!isOpen) {
+                    selectOwnerOptions.classList.add('show');
+                    selectOwnerTrigger.classList.add('active');
+                }
+            });
+
+            selectGroupTrigger.addEventListener('click', (e) => {
+                if (!isEditMode) return;
+                e.stopPropagation();
+                const isOpen = selectGroupOptions.classList.contains('show');
+                closeAllDropdowns();
+                if (!isOpen) {
+                    selectGroupOptions.classList.add('show');
+                    selectGroupTrigger.classList.add('active');
+                }
+            });
+
+            // Owner Name Editing Interaction
+            const ownerEditContainer = document.getElementById('owner-edit-container');
+            const btnEditOwner = document.getElementById('btn-edit-owner');
+
+            btnEditOwner.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllDropdowns();
+
+                // Hide display
+                selectOwnerWrapper.style.display = 'none';
+                btnEditOwner.style.display = 'none';
+
+                // Create inline inputs
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'inline-edit-input';
+                input.value = activeOwner;
+                input.id = 'owner-edit-input';
+
+                const btnSave = document.createElement('button');
+                btnSave.className = 'icon-btn primary';
+                btnSave.title = 'Save owner name';
+                btnSave.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ec27e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'icon-btn';
+                btnCancel.title = 'Cancel editing';
+                btnCancel.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e01b24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+                ownerEditContainer.appendChild(input);
+                ownerEditContainer.appendChild(btnSave);
+                ownerEditContainer.appendChild(btnCancel);
+
+                input.focus();
+                input.select();
+
+                const saveOwnerAction = () => {
+                    const val = input.value.trim();
+                    if (val) {
+                        const oldVal = activeOwner;
+                        const idx = ownersList.indexOf(oldVal);
+                        if (idx !== -1) {
+                            ownersList[idx] = val;
+                        } else {
+                            ownersList.push(val);
+                        }
+                        activeOwner = val;
+                        document.getElementById('owner-display-name').innerText = val;
+                        renderOwnerDropdown();
+                    }
+                    cleanupOwnerEdit();
+                };
+
+                const cleanupOwnerEdit = () => {
+                    input.remove();
+                    btnSave.remove();
+                    btnCancel.remove();
+                    selectOwnerWrapper.style.display = '';
+                    btnEditOwner.style.display = '';
+                };
+
+                btnSave.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    saveOwnerAction();
+                });
+                btnCancel.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    cleanupOwnerEdit();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.stopPropagation();
+                        saveOwnerAction();
+                    }
+                    if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        cleanupOwnerEdit();
+                    }
+                });
+            });
+
+            // Group Name Editing Interaction
+            const groupEditContainer = document.getElementById('group-edit-container');
+            const btnEditGroup = document.getElementById('btn-edit-group');
+
+            btnEditGroup.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllDropdowns();
+
+                // Hide display
+                selectGroupWrapper.style.display = 'none';
+                btnEditGroup.style.display = 'none';
+
+                // Create inline inputs
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'inline-edit-input';
+                input.value = activeGroup;
+                input.id = 'group-edit-input';
+
+                const btnSave = document.createElement('button');
+                btnSave.className = 'icon-btn primary';
+                btnSave.title = 'Save group name';
+                btnSave.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2ec27e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+                const btnCancel = document.createElement('button');
+                btnCancel.className = 'icon-btn';
+                btnCancel.title = 'Cancel editing';
+                btnCancel.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e01b24" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>`;
+
+                groupEditContainer.appendChild(input);
+                groupEditContainer.appendChild(btnSave);
+                groupEditContainer.appendChild(btnCancel);
+
+                input.focus();
+                input.select();
+
+                const saveGroupAction = () => {
+                    const val = input.value.trim();
+                    if (val) {
+                        const oldVal = activeGroup;
+                        const idx = groupsList.indexOf(oldVal);
+                        if (idx !== -1) {
+                            groupsList[idx] = val;
+                        } else {
+                            groupsList.push(val);
+                        }
+                        activeGroup = val;
+                        document.getElementById('group-display-name').innerText = val;
+                        renderGroupDropdown();
+                    }
+                    cleanupGroupEdit();
+                };
+
+                const cleanupGroupEdit = () => {
+                    input.remove();
+                    btnSave.remove();
+                    btnCancel.remove();
+                    selectGroupWrapper.style.display = '';
+                    btnEditGroup.style.display = '';
+                };
+
+                btnSave.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    saveGroupAction();
+                });
+                btnCancel.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    cleanupGroupEdit();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.stopPropagation();
+                        saveGroupAction();
+                    }
+                    if (e.key === 'Escape') {
+                        e.stopPropagation();
+                        cleanupGroupEdit();
+                    }
+                });
+            });
+
+            // Global Edit Mode Toggle Logic
+            btnGlobalEdit.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                if (isEditMode) {
+                    // --- SAVE CHANGES / LOCK MODE ---
+                    // If inline owner edit input is open, trigger save
+                    const ownerSaveBtn = ownerEditContainer.querySelector('.icon-btn.primary');
+                    if (ownerSaveBtn) {
+                        ownerSaveBtn.click();
+                    }
+                    
+                    // If inline group edit input is open, trigger save
+                    const groupSaveBtn = groupEditContainer.querySelector('.icon-btn.primary');
+                    if (groupSaveBtn) {
+                        groupSaveBtn.click();
+                    }
+
+                    isEditMode = false;
+                    permissionsPanel.classList.remove('edit-mode');
+                    btnGlobalEdit.classList.remove('editing-active');
+                    document.getElementById('btn-global-edit-text').innerText = "Edit Permissions";
+                    closeAllDropdowns();
+                } else {
+                    // --- INTERACTIVE FORM MODE ---
+                    isEditMode = true;
+                    permissionsPanel.classList.add('edit-mode');
+                    btnGlobalEdit.classList.add('editing-active');
+                    document.getElementById('btn-global-edit-text').innerText = "Save Changes";
+                }
+            });
+
+            // Initial render
+            renderOwnerDropdown();
+            renderGroupDropdown();
         });
     </script>
 </body>
