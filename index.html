@@ -12,8 +12,8 @@
             --ubuntu-bg: #300A24;
             --header-bg: #2d2d2d;
             --close-btn: #E95420;
-            --user-color: #87FF5F;
-            --path-color: #5F87FF;
+            --user-color: #33d17a;
+            --path-color: #3584e4;
             --page-bg: radial-gradient(circle at center, #2c001e 0%, #0f000a 100%);
             --text-color: #ffffff;
             --header-text: #cccccc;
@@ -692,7 +692,7 @@
 
     <div class="external-toolbar">
         <span class="toolbar-label">Identity</span>
-        <input type="text" id="input-identity" class="toolbar-input" placeholder="user@host:path" value="srezon@ubuntu">
+        <input type="text" id="input-identity" class="toolbar-input" placeholder="user@host:path" value="soura@ubuntu">
         
         <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
         
@@ -710,12 +710,12 @@
                 <div class="control-dot"><div class="icon icon-min"></div></div>
                 <div class="control-dot"><div class="icon icon-max"></div></div>
             </div>
-            <div class="window-title" contenteditable="true" style="font-size: 14px;">srezon@ubuntu: ~</div>
+            <div class="window-title" contenteditable="true" style="font-size: 14px;">soura@ubuntu: ~</div>
         </div>
-        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #87FF5F; font-weight: bold;">srezon</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span> ls -l
+        <div class="terminal-body" id="terminal" contenteditable="true" spellcheck="false"><span class="user" style="color: #33d17a; font-weight: bold;">soura@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #3584e4; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span> ls -l
 total 4
--rw-r--r-- 1 srezon srezon 1234 May 24 10:00 note.txt
-<span class="user" style="color: #87FF5F; font-weight: bold;">srezon</span>@<span class="user" style="color: #87FF5F; font-weight: bold;">ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
+-rw-r--r-- 1 soura soura 1234 May 24 10:00 note.txt
+<span class="user" style="color: #33d17a; font-weight: bold;">soura@ubuntu</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #3584e4; font-weight: bold;">~</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;</div>
     </div>
 
     <!-- ==========================================================================
@@ -886,14 +886,14 @@ total 4
             };
 
             const insertPrompt = () => {
-                const full = inputIdentity.value || 'srezon@ubuntu';
+                const full = inputIdentity.value || 'soura@ubuntu';
                 
                 // Split logic: user@host | : | path
                 let [userHost, path] = full.split(':');
                 if (!path) path = '~';
                 path = path.replace('$', '').replace('#', '').trim();
 
-                const promptHTML = `<span class="user" style="color: #87FF5F; font-weight: bold;">${userHost}</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #5F87FF; font-weight: bold;">${path}</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;`;
+                const promptHTML = `<span class="user" style="color: #33d17a; font-weight: bold;">${userHost}</span><span style="color: #ffffff; font-weight: bold;">:</span><span class="path" style="color: #3584e4; font-weight: bold;">${path}</span><span class="char" style="color: #ffffff; font-weight: bold;">$</span>&nbsp;`;
                 
                 document.execCommand('insertHTML', false, promptHTML);
                 document.execCommand('bold', false, null); 
@@ -931,19 +931,38 @@ total 4
                 }
             });
 
-            // Handle Paste - Strict Plain Text Only
+            // Helper function to parse terminal lines and color them dynamically
+            const parseAndColorText = (text) => {
+                const lines = text.split(/\r?\n/);
+                const parsedLines = lines.map((line, idx) => {
+                    if (idx === lines.length - 1 && line === '') return '';
+                    
+                    const match = line.match(/^([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+)(:)([^$#]*)([$#])([\s\S]*)$/);
+                    if (match) {
+                        const userHost = match[1];
+                        const colon = match[2];
+                        const path = match[3];
+                        const symbol = match[4];
+                        const cmd = match[5];
+                        
+                        return `<span class="user" style="color: #33d17a; font-weight: bold;">${userHost}</span>` +
+                               `<span style="color: #ffffff; font-weight: bold;">${colon}</span>` +
+                               `<span class="path" style="color: #3584e4; font-weight: bold;">${path}</span>` +
+                               `<span class="char" style="color: #ffffff; font-weight: bold;">${symbol}</span>` +
+                               `<span class="command" style="color: #dfdbce;">${cmd}</span>`;
+                    } else {
+                        return `<span style="color: #dfdbce;">${line}</span>`;
+                    }
+                });
+                return parsedLines.join('\n');
+            };
+
+            // Handle Paste - Strict Ubuntu Yaru Dynamic Color Parsing
             terminal.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const text = (e.clipboardData || window.clipboardData).getData('text/plain');
-                
-                // Insert as plain text only, stripping all HTML/styles
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-                selection.deleteFromDocument();
-                selection.getRangeAt(0).insertNode(document.createTextNode(text));
-                
-                // Move cursor to end of inserted text
-                selection.collapseToEnd();
+                const htmlContent = parseAndColorText(text);
+                document.execCommand('insertHTML', false, htmlContent);
             });
 
             // --- Lifecycle ---
