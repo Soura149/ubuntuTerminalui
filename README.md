@@ -1,3 +1,9 @@
+# Creator Thoughts
+Just to write the ouput of ubuntu manually and do the needed . tooo lazy to install it.
+readme for guide if you cant understand, just press some buttons in the ui you will figure out all the best!  
+
+---
+
 # Ubuntu 24.04 Environment Simulation
 
 A high-fidelity, interactive Ubuntu 24.04 Environment Simulation built entirely within a single static footprint. The project integrates a dynamic Command Line Terminal emulator with a native-styled GNOME Nautilus Custom Permissions Panel, enabling seamless interaction and live configuration state toggles.
